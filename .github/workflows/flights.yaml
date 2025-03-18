@@ -25,6 +25,7 @@ jobs:
           pwd
           ls
           deck file openapi2kong -s $DECK_API_NAME/api/openapi-spec/openapi.yaml > $DECK_API_NAME/api/deck-file/generated/kong-generated.yaml
+          ls $DECK_API_NAME/api/deck-file/generated
 
       - name: Upload Kong Generated Config
         uses: actions/upload-artifact@v4
