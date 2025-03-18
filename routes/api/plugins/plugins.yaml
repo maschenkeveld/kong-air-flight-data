@@ -9,4 +9,4 @@ add-plugins:
       _config: common_opentelemetry
       config:
         resource_attributes:
-          service.name: alice-${{ env "DECK_KONG_DEPLOYMENT" }}
+          service.name: routes-${{ env "DECK_KONG_DEPLOYMENT" }}
