@@ -22,13 +22,13 @@ jobs:
       - name: Generate Kong Config
         run: |
           echo $GITHUB_SHA
-          deck file openapi2kong -s $DECK_API_NAME/apis/openapi-spec/openapi.yaml > $DECK_API_NAME/apis/deck-file/generated/kong-generated.yaml
+          deck file openapi2kong -s $DECK_API_NAME/api/openapi-spec/openapi.yaml > $DECK_API_NAME/api/deck-file/generated/kong-generated.yaml
 
       - name: Upload Kong Generated Config
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: kong-generated.yaml
-          path: $DECK_API_NAME/apis/deck-file/generated/kong-generated.yaml
+          path: $DECK_API_NAME/api/deck-file/generated/kong-generated.yaml
 
   plugin_and_patch_kong_config:
     runs-on: self-hosted
@@ -38,18 +38,18 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup Environment Variables
-        run: source $DECK_API_NAME/apis/env-vars/env-vars
+        run: source $DECK_API_NAME/api/env-vars/env-vars
 
       - name: Patch Kong Config with Plugins
         run: |
-          cat $DECK_API_NAME/apis/deck-file/generated/kong-generated.yaml | deck file patch -s - common/patches/patches.yaml | deck file patch -s - $DECK_API_NAME/apis/patches/patches.yaml | deck file add-plugins -s - $DECK_API_NAME/apis/plugins/plugins.yaml | deck file add-tags -s - $DECK_API_NAME > $DECK_API_NAME/apis/deck-file/generated/kong-patched.yaml
-          cat $DECK_API_NAME/apis/deck-file/generated/kong-patched.yaml
+          cat $DECK_API_NAME/api/deck-file/generated/kong-generated.yaml | deck file patch -s - common/patches/patches.yaml | deck file patch -s - $DECK_API_NAME/api/patches/patches.yaml | deck file add-plugins -s - $DECK_API_NAME/api/plugins/plugins.yaml | deck file add-tags -s - $DECK_API_NAME > $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
+          cat $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
 
       - name: Upload Kong Patched Config
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: kong-patched.yaml
-          path: $DECK_API_NAME/apis/deck-file/generated/kong-patched.yaml
+          path: $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
 
   diff:
     runs-on: self-hosted
@@ -59,12 +59,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup Environment Variables
-        run: source $DECK_API_NAME/apis/env-vars/env-vars
+        run: source $DECK_API_NAME/api/env-vars/env-vars
 
       - name: Diff Kong Config
         run: |
-          cat $DECK_API_NAME/apis/deck-file/generated/kong-patched.yaml
-          deck gateway diff $DECK_API_NAME/apis/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
+          cat $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
+          deck gateway diff $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
 
   sync:
     runs-on: self-hosted
@@ -74,12 +74,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup Environment Variables
-        run: source $DECK_API_NAME/apis/env-vars/env-vars
+        run: source $DECK_API_NAME/api/env-vars/env-vars
 
       - name: Sync Kong Config
         run: |
-          cat $DECK_API_NAME/apis/deck-file/generated/kong-patched.yaml
-          deck gateway sync $DECK_API_NAME/apis/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
+          cat $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
+          deck gateway sync $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
 
   # Optional Dump and Dump API jobs
   # dump:
@@ -112,4 +112,4 @@ jobs:
   #           --kong-addr https://kong-admin-api-$DECK_KONG_DEPLOYMENT.kong-air.pve-1.schenkeveld.io \
   #           --select-tag $DECK_API_NAME \
   #           --yes \
-  #           -o $DECK_API_NAME/apis/deck-file/dumped/kong-$DATETIME.yaml
+  #           -o $DECK_API_NAME/api/deck-file/dumped/kong-$DATETIME.yaml
