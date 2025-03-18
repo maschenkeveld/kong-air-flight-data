@@ -6,7 +6,7 @@ on:
       - main  # You can specify which branches to trigger on
 
 env:
-  DECK_API_NAME: "flights"
+  DECK_API_NAME: "routes"
   DECK_KONG_DEPLOYMENT: "dev"
   KONNECT_ADDR: https://us.api.konghq.com
   KONNECT_CONTROL_PLANE_NAME: "On Premise Hybrid Control Plane"
