@@ -85,7 +85,7 @@ jobs:
           chmod 777 common/plugin-templates/opentelemetry.yaml
           pwd
           ls
-          deck gateway diff $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name "$KONNECT_CONTROL_PLANE_NAME" --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
+          deck gateway diff $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name "$KONNECT_CONTROL_PLANE_NAME" --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
 
   sync:
     runs-on: self-hosted
