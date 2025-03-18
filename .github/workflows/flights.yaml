@@ -100,7 +100,7 @@ jobs:
       - name: Sync Kong Config
         run: |
           cat $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
-          deck gateway sync $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
+          deck gateway sync $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag Maarten
 
   # Optional Dump and Dump API jobs
   # dump:
