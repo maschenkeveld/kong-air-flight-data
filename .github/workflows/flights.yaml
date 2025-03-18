@@ -7,12 +7,16 @@ on:
 
 env:
   DECK_API_NAME: "flights"
-  DECK_KONG_DEPLOYMENT: "konnect-eu-default"
+  DECK_KONG_DEPLOYMENT: "dev"
   KONNECT_ADDR: https://us.api.konghq.com
   KONNECT_CONTROL_PLANE_NAME: "On Premise Hybrid Control Plane"
   KONNECT_TOKEN: kpat_ct0GEm09jMtlwvPfkqxOfe38TgZ80VdOU4kfVQBBb48AHaZi1
 
 jobs:
+
+# LINTING
+# BREAKING CHANGES
+
   generate_kong_config:
     runs-on: self-hosted
     steps:
@@ -22,10 +26,7 @@ jobs:
       - name: Generate Kong Config
         run: |
           echo $GITHUB_SHA
-          pwd
-          ls
           deck file openapi2kong -s $DECK_API_NAME/api/openapi-spec/openapi.yaml > $DECK_API_NAME/api/deck-file/generated/kong-generated.yaml
-          ls $DECK_API_NAME/api/deck-file/generated
 
       - name: Upload Kong Generated Config
         uses: actions/upload-artifact@v4
@@ -51,14 +52,14 @@ jobs:
 
       - name: Patch Kong Config with Plugins
         run: |
-          cat $DECK_API_NAME/api/deck-file/generated/kong-generated.yaml | deck file patch -s - common/patches/patches.yaml | deck file patch -s - $DECK_API_NAME/api/patches/patches.yaml | deck file add-plugins -s - $DECK_API_NAME/api/plugins/plugins.yaml | deck file add-tags -s - $DECK_API_NAME > $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
-          cat $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
+          cat $DECK_API_NAME/api/deck-file/generated/kong-generated.yaml | deck file add-plugins -s - $DECK_API_NAME/api/plugins/plugins.yaml | deck file patch -s - common/patches/patches.yaml | deck file patch -s - $DECK_API_NAME/api/patches/patches.yaml | deck file add-tags -s - $DECK_API_NAME > $DECK_API_NAME/api/deck-file/generated/kong-plugined-and-patched.yaml
+          cat $DECK_API_NAME/api/deck-file/generated/kong-plugined-and-patched.yaml
 
       - name: Upload Kong Patched Config
         uses: actions/upload-artifact@v4
         with:
-          name: kong-patched.yaml
-          path: ${{ env.DECK_API_NAME }}/api/deck-file/generated/kong-patched.yaml
+          name: kong-plugined-and-patched.yaml
+          path: ${{ env.DECK_API_NAME }}/api/deck-file/generated/kong-plugined-and-patched.yaml
 
   diff:
     runs-on: self-hosted
@@ -70,7 +71,7 @@ jobs:
       - name: Download Kong Patched Config
         uses: actions/download-artifact@v4
         with:
-          name: kong-patched.yaml
+          name: kong-plugined-and-patched.yaml
           path: ${{ env.DECK_API_NAME }}/api/deck-file/generated
 
       - name: Setup Environment Variables
@@ -79,11 +80,14 @@ jobs:
       - name: Diff Kong Config
         run: |
           source $DECK_API_NAME/api/env-vars/env-vars
-          deck gateway diff $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name "$KONNECT_CONTROL_PLANE_NAME" --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
+          deck gateway diff $DECK_API_NAME/api/deck-file/generated/kong-plugined-and-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name "$KONNECT_CONTROL_PLANE_NAME" --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
+
+# APPROVAL STAGE
+# BACKUP STAGE
 
   sync:
     runs-on: self-hosted
-    needs: diff
+    needs: plugin_and_patch_kong_config
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -91,17 +95,19 @@ jobs:
       - name: Download Kong Patched Config
         uses: actions/download-artifact@v4
         with:
-          name: kong-patched.yaml
+          name: kong-plugined-and-patched.yaml
           path: ${{ env.DECK_API_NAME }}/api/deck-file/generated
 
       - name: Setup Environment Variables
-        run: source $DECK_API_NAME/api/env-vars/env-vars
+        run: source ${{ env.DECK_API_NAME }}/api/env-vars/env-vars
 
-      - name: Sync Kong Config
+      - name: Diff Kong Config
         run: |
           source $DECK_API_NAME/api/env-vars/env-vars
-          cat $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
-          deck gateway sync $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
+          deck gateway sync $DECK_API_NAME/api/deck-file/generated/kong-plugined-and-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name "$KONNECT_CONTROL_PLANE_NAME" --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
+
+# TEST STAGE
+# ROLLBACK STAGE
 
   # Optional Dump and Dump API jobs
   # dump:
