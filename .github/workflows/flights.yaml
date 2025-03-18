@@ -81,7 +81,7 @@ jobs:
           source $DECK_API_NAME/api/env-vars/env-vars
           cat $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
           cat common/plugin-templates/opentelemetry.yaml
-         
+          deck gateway diff $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
 
   sync:
     runs-on: self-hosted
