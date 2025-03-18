@@ -78,12 +78,13 @@ jobs:
 
       - name: Diff Kong Config
         run: |
+          source $DECK_API_NAME/api/env-vars/env-vars
           cat $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
           deck gateway diff $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
 
   sync:
     runs-on: self-hosted
-    needs: plugin_and_patch_kong_config
+    needs: diff
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
