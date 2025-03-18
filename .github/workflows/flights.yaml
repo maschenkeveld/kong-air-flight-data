@@ -74,7 +74,7 @@ jobs:
           path: ${{ env.DECK_API_NAME }}/api/deck-file/generated
 
       - name: Setup Environment Variables
-        run: source $DECK_API_NAME/api/env-vars/env-vars
+        run: source ${{ env.DECK_API_NAME }}/api/env-vars/env-vars
 
       - name: Diff Kong Config
         run: |
@@ -99,8 +99,9 @@ jobs:
 
       - name: Sync Kong Config
         run: |
+          source $DECK_API_NAME/api/env-vars/env-vars
           cat $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
-          deck gateway sync $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag Maarten
+          deck gateway sync $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml common/plugin-templates/opentelemetry.yaml --konnect-addr $KONNECT_ADDR --konnect-control-plane-name $KONNECT_CONTROL_PLANE_NAME --konnect-token $KONNECT_TOKEN --select-tag $DECK_API_NAME --select-tag $DECK_OWNER
 
   # Optional Dump and Dump API jobs
   # dump:
