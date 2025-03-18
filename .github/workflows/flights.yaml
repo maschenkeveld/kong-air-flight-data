@@ -40,6 +40,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Download Kong Patched Config
+        uses: actions/download-artifact@v4
+        with:
+          name: kong-generated.yaml
+          path: ${{ env.DECK_API_NAME }}/api/deck-file/generated
+
       - name: Setup Environment Variables
         run: source $DECK_API_NAME/api/env-vars/env-vars
 
@@ -52,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kong-patched.yaml
-          path: $DECK_API_NAME/api/deck-file/generated/kong-patched.yaml
+          path: ${{ env.DECK_API_NAME }}/api/deck-file/generated/kong-patched.yaml
 
   diff:
     runs-on: self-hosted
